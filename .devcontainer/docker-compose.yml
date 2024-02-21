@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  vscode:
+    build: .
+    volumes:
+      - ../:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.ssh:/mnt/ssh
+    environment:
+      - TZ=${TZ}
+    # Needed for debugging
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    entrypoint: ["zsh", "-c", "while sleep 1000; do :; done"]
+    networks:
+      - vs_net
+
+  hping:
+    image: sflow/hping3:latest
+    command: "${BRODCAST} --udp -p ${UDP_PORT} --rand-source --data 500"
+    networks:
+      - vs_net
+    depends_on:
+      - vscode
+
+networks:
+  vs_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${SUBNET}

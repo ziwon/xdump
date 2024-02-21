@@ -1,0 +1,7 @@
+---
+interface: eth0
+data_home: /workspace/data
+file_prefix: udp
+excluded_ports: [53, 111]
+start_time: 08:00
+end_time: 18:00
