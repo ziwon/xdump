@@ -12,6 +12,7 @@ services:
     # Needed for debugging
     cap_add:
       - SYS_PTRACE
+      - CAP_SYS_TIME
     security_opt:
       - seccomp:unconfined
     entrypoint: ["zsh", "-c", "while sleep 1000; do :; done"]

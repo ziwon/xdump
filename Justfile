@@ -9,6 +9,15 @@ compile:
 release:
     cargo build --release
 
+today-start:
+    date -s "$(date +%Y-%m-%d) 08:00:00"
+
+today-end:
+    date -s "$(date +%Y-%m-%d) 18:00:00"
+
+tomorrow:
+    date -s "$(date -d "+1 day" +%Y-%m-%d) 08:00:00"
+
 test:
     cargo test
 

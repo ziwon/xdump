@@ -73,7 +73,8 @@ impl Capture {
                 }
             }
 
-            time::sleep(Duration::from_millis(10)).await;
+            // 나노초 단위로 수행
+            tokio::time::sleep(std::time::Duration::from_nanos(1_000_000)).await;
         }
     }
 
@@ -112,10 +113,7 @@ impl Capture {
 
     async fn handle_udp_packet(&self, ipv4_packet: &Ipv4Packet<'_>, ethernet: &EthernetPacket<'_>) {
         let udp = match UdpPacket::new(ipv4_packet.payload()) {
-            Some(packet) => {
-                // xlog!("debug", format!("{:?}", packet));
-                packet
-            }
+            Some(packet) => packet,
             None => {
                 xlog!('W', "Invalid UDP packet.");
                 return;

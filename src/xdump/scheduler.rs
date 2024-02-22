@@ -50,48 +50,45 @@ impl Scheduler {
     }
 
     pub async fn run(&self) {
-        xlog!('I', "started");
-
-        let mut next_start = Self::next_occurrence(self.start_time);
-        let mut next_end = Self::next_occurrence(self.end_time);
+        xlog!('I', "Scheduler started");
+        let mut next_start = Self::next_occurrence(self.start_time, &Local::now());
+        let mut next_end = Self::next_occurrence(self.end_time, &Local::now());
 
         loop {
             let now = Local::now();
+
             xlog!(
                 'D',
-                format!("now: {:?}, ns: {:?}, ne: {:?}", now, next_start, next_end)
+                format!(
+                    "now: {:?}, next_start: {:?}, next_end: {:?}",
+                    now, next_start, next_end
+                )
             );
 
-            if now >= next_start {
+            if now >= next_start && now < next_end {
                 xlog!('D', "Capture state changed - true");
                 on_capture_state();
-                next_start = Self::next_occurrence(self.start_time) + Duration::days(1);
+                next_start = Self::next_occurrence(self.start_time, &Local::now());
+                next_end = Self::next_occurrence(self.end_time, &Local::now());
             }
+
             if now >= next_end {
                 xlog!('D', "Capture state changed - false");
                 off_capture_state();
-                next_end = Self::next_occurrence(self.end_time) + Duration::days(1);
+
+                next_start =
+                    Self::next_occurrence(self.start_time, &now) + chrono::Duration::days(1);
+                next_end = Self::next_occurrence(self.end_time, &now) + chrono::Duration::days(1);
             }
 
-            // Waiting for the next capture
-            let sleep_duration = std::cmp::min(
-                next_start.signed_duration_since(now),
-                next_end.signed_duration_since(now),
-            );
-
-            let sleep_duration = sleep_duration
-                .to_std()
-                .unwrap_or_else(|_| tokio::time::Duration::from_secs(1)); // Fallback to 1s if negative duration
-
-            xlog!('D', format!("Waiting for next event: {:?}", sleep_duration));
-            tokio::time::sleep(sleep_duration).await;
+            // Wait until the next second before checking again
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         }
     }
 
-    fn next_occurrence(time: NaiveTime) -> DateTime<Local> {
-        let now = Local::now();
+    fn next_occurrence(time: NaiveTime, now: &DateTime<Local>) -> DateTime<Local> {
         let today_date = now.date_naive();
-        let target_datetime = Local
+        let mut target_datetime = Local
             .from_local_datetime(&today_date.and_time(time))
             .unwrap();
 

@@ -63,7 +63,7 @@ async fn main() {
     });
 
     let w = tokio::spawn(async move {
-        writer.write().await.expect("Writer task failed");
+        writer.write().await;
     });
 
     let _ = c.await;
