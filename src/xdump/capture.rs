@@ -12,7 +12,6 @@ use pnet::packet::{
 
 use thiserror::Error;
 use tokio::sync::mpsc::Sender;
-use tokio::time::{self, Duration};
 
 use super::config::Config;
 use super::global::check_capture_state;

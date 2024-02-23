@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration, Local, NaiveTime, TimeZone, Timelike};
+use chrono::{DateTime, Local, NaiveTime, TimeZone, Timelike};
 use thiserror::Error;
 
 use super::{
@@ -88,7 +88,7 @@ impl Scheduler {
 
     fn next_occurrence(time: NaiveTime, now: &DateTime<Local>) -> DateTime<Local> {
         let today_date = now.date_naive();
-        let mut target_datetime = Local
+        let target_datetime = Local
             .from_local_datetime(&today_date.and_time(time))
             .unwrap();
 
